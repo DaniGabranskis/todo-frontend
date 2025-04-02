@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import API from '../api';
-import { removeToken } from '../utils/token';
+import { getToken, removeToken } from '../utils/token';
 import { useNavigate } from 'react-router-dom';
 import '../styles/todo.css';
 
@@ -10,8 +10,16 @@ export default function TodoPage() {
   const navigate = useNavigate();
 
   const fetchTasks = async () => {
-    const res = await API.get('/tasks');
-    setTasks(res.data);
+    try {
+      const res = await API.get('/tasks');
+      setTasks(res.data);
+    } catch (err) {
+      console.error('Ошибка при загрузке задач:', err);
+      if (err.response && err.response.status === 401) {
+        removeToken();
+        navigate('/login');
+      }
+    }
   };
 
   const addTask = async () => {
@@ -37,37 +45,43 @@ export default function TodoPage() {
   };
 
   useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
     fetchTasks();
   }, []);
 
-    return (
-  <div className="todo-container">
-    <button className="logout-btn" onClick={logout}>Logout</button>
-    <h2>My To-Do List</h2>
-    <div className="todo-form">
-      <input
-        type="text"
-        placeholder="New task..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-      <button onClick={addTask}>Add</button>
+  return (
+    <div className="todo-container">
+      <button className="logout-btn" onClick={logout}>Logout</button>
+      <h2>My To-Do List</h2>
+      <div className="todo-form">
+        <input
+          type="text"
+          placeholder="New task..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <button onClick={addTask}>Add</button>
+      </div>
+      <ul>
+        {tasks.map(t => (
+          <li key={t.id}>
+            <div>
+              <input
+                type="checkbox"
+                checked={t.completed}
+                onChange={() => toggleTask(t.id, t.completed)}
+              />
+              {t.title}
+            </div>
+            <button onClick={() => deleteTask(t.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
-    <ul>
-      {tasks.map(t => (
-        <li key={t.id}>
-          <div>
-            <input
-              type="checkbox"
-              checked={t.completed}
-              onChange={() => toggleTask(t.id, t.completed)}
-            />
-            {t.title}
-          </div>
-          <button onClick={() => deleteTask(t.id)}>Delete</button>
-        </li>
-      ))}
-    </ul>
-  </div>
-);
+  );
 }

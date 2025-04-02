@@ -52,7 +52,7 @@ export default function TodoPage() {
     }
 
     fetchTasks();
-  }, []);
+  }, [[fetchTasks, navigate]);
 
   return (
     <div className="todo-container">

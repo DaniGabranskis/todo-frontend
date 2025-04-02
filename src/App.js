@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -6,7 +6,16 @@ import TodoPage from './pages/TodoPage';
 import { getToken } from './utils/token';
 
 function App() {
-  const isLoggedIn = !!getToken();
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
+
+  useEffect(() => {
+    const token = getToken();
+    setIsLoggedIn(!!token);
+  }, []);
+
+  if (isLoggedIn === null) {
+    return <div>Loading...</div>; // Подождём проверку
+  }
 
   return (
     <Router>
@@ -20,4 +29,3 @@ function App() {
 }
 
 export default App;
-

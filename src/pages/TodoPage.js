@@ -9,18 +9,18 @@ export default function TodoPage() {
   const [text, setText] = useState('');
   const navigate = useNavigate();
 
-  const fetchTasks = async () => {
-    try {
-      const res = await API.get('/tasks');
-      setTasks(res.data);
-    } catch (err) {
-      console.error('Ошибка при загрузке задач:', err);
-      if (err.response && err.response.status === 401) {
-        removeToken();
-        navigate('/login');
-      }
+  const fetchTasks = useCallback(async () => {
+  try {
+    const res = await API.get('/tasks');
+    setTasks(res.data);
+  } catch (err) {
+    console.error('Ошибка при загрузке задач:', err);
+    if (err.response && err.response.status === 401) {
+      removeToken();
+      navigate('/login');
     }
-  };
+  }
+}, [navigate]);
 
   const addTask = async () => {
     if (!text) return;
@@ -45,14 +45,14 @@ export default function TodoPage() {
   };
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+  const token = getToken();
+  if (!token) {
+    navigate('/login');
+    return;
+  }
 
-    fetchTasks();
-  }, [[fetchTasks, navigate]);
+  fetchTasks();
+}, [fetchTasks, navigate]);
 
   return (
     <div className="todo-container">

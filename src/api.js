@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://192.168.8.137:5000/api',
+  baseURL: 'https://todo-backend-app-bke5evh2h9f2efba.westeurope-01.azurewebsites.net/api',
 });
 
 API.interceptors.request.use((req) => {
